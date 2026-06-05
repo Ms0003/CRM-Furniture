@@ -14,7 +14,11 @@ const seedAdmin = async () => {
   const existingAdmin = await User.findOne({ email });
 
   if (existingAdmin) {
-    console.log(`Admin already exists: ${email}`);
+    console.log(`Admin already exists: ${email}. Updating name and password...`);
+    existingAdmin.name = name;
+    existingAdmin.password = password;
+    await existingAdmin.save();
+    console.log(`Admin credentials updated successfully!`);
     await mongoose.disconnect();
     return;
   }
