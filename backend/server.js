@@ -18,7 +18,22 @@ const allowedOrigins = (process.env.CLIENT_ORIGINS || "http://localhost:5173,htt
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Allow localhost/127.0.0.1 origins
+      if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+        return callback(null, true);
+      }
+
+      // Allow any Vercel domain
+      if (origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+
+      // Allow explicitly defined client origins
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
