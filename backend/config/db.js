@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 const connectDB = async () => {
-  // If already connected or connecting, skip
-  if (mongoose.connection.readyState >= 1) {
+  // If already fully connected, skip
+  if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
 
