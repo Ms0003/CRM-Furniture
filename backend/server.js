@@ -36,11 +36,30 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 
+// Ensure database is connected before processing requests (crucial for serverless)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use(notFound);
 app.use(errorHandler);
 
-connectDB().then(() => {
-  app.listen(port, () => {
-    console.log(`API server running on port ${port}`);
-  });
-});
+// Only listen when running locally, not in Vercel serverless environment
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  connectDB()
+    .then(() => {
+      app.listen(port, () => {
+        console.log(`API server running on port ${port}`);
+      });
+    })
+    .catch((err) => {
+      console.error("Failed to connect to DB on startup:", err);
+    });
+}
+
+module.exports = app;
