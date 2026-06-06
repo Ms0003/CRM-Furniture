@@ -44,13 +44,6 @@ app.use(
 );
 app.use(express.json({ limit: "1mb" }));
 
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", service: "furniture-cms-api" });
-});
-
-app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-
 // Ensure database is connected before processing requests (crucial for serverless)
 app.use(async (req, res, next) => {
   try {
@@ -61,19 +54,26 @@ app.use(async (req, res, next) => {
   }
 });
 
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok", service: "furniture-cms-api" });
+});
+
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+
 app.use(notFound);
 app.use(errorHandler);
 
 // Only listen when running locally, not in Vercel serverless environment
 if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
   connectDB()
-    .then(() => {
+    .catch((err) => {
+      console.warn("MongoDB connection failed on startup. Local dev will run in mock mode.");
+    })
+    .finally(() => {
       app.listen(port, () => {
         console.log(`API server running on port ${port}`);
       });
-    })
-    .catch((err) => {
-      console.error("Failed to connect to DB on startup:", err);
     });
 }
 

@@ -11,8 +11,8 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-  // If connection is not active/connected, reset our cache to force a reconnect
-  if (mongoose.connection.readyState !== 1) {
+  // Only reset connection cache if completely disconnected (0) or disconnecting (3)
+  if (mongoose.connection.readyState === 0 || mongoose.connection.readyState === 3) {
     cached.conn = null;
     cached.promise = null;
   }
@@ -52,9 +52,7 @@ const connectDB = async () => {
     console.warn("⚠️  WARNING: Running in-memory mock database mode!");
     console.warn("--------------------------------------------------");
 
-    if (process.env.VERCEL) {
-      throw error;
-    }
+    throw error; // Always throw connection error so Express error handler returns it
   }
 
   return cached.conn;
