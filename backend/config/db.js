@@ -11,7 +11,13 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-  // If we already have a connection, return it
+  // If connection is not active/connected, reset our cache to force a reconnect
+  if (mongoose.connection.readyState !== 1) {
+    cached.conn = null;
+    cached.promise = null;
+  }
+
+  // If we already have an active connection, return it
   if (cached.conn) {
     return cached.conn;
   }
@@ -38,6 +44,7 @@ const connectDB = async () => {
   } catch (error) {
     // If connection fails, clear the cached promise so we can retry on next request
     cached.promise = null;
+    cached.conn = null;
     global.useMockDB = true;
 
     console.warn(`MongoDB connection failed: ${error.message}`);
