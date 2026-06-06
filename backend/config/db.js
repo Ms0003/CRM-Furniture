@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 
+// Disable query buffering globally for all models
+mongoose.set("bufferCommands", false);
+
 // Initialize cached connection object globally
 let cached = global.mongoose;
 
